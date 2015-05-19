@@ -9,16 +9,16 @@
 `define VCHARLOG2 5
 `define BITPERCH 4
 
-`define L 3
+`define L 10
 `define N 10
 
-module vga(clk,RSTn, hsync,vsync,hvalid,vvalid, r,g,b);
-	parameter N=10; parameter L=36;
+module vga(clk,RSTn, hsync,vsync, r,g,b);
+	parameter N=10; parameter L=`L;
 	input clk, RSTn;
-	output hsync,vsync,hvalid,vvalid,  r,g,b;
-	wire out;
+	output hsync,vsync,  r,g,b;
+	wire out,   hvalid,vvalid;
 	assign r=out;assign g=out;assign b=out;
-	wire [10:0] hcnt,vcnt,   hdx,vdx;	
+	wire [10:0] hcnt,vcnt;	
 
    	sync sync(.clk(clk),.RSTn(RSTn),.hsync(hsync),.vsync(vsync),.hvalid(hvalid),.vvalid(vvalid),.hcnt(hcnt),.vcnt(vcnt) );
 

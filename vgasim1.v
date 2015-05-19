@@ -1,9 +1,9 @@
 `timescale 1ns / 1ns
 module vgasim1;
    reg clk,RSTn;
-   wire hsync,vsync,hvalid,vvalid,  r,g,b;
+   wire hsync,vsync,  r,g,b;
    wire [10:0] hcnt,vcnt;
-   vga vga_inst(clk,RSTn, hsync,vsync,hvalid,vvalid, r,g,b);
+   vga vga_inst(clk,RSTn, hsync,vsync, r,g,b);
    parameter L = 36;
    
    initial begin

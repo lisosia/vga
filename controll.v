@@ -1,4 +1,4 @@
-`define L 3
+`define L 10
 `define RAMDELAY 2
 module controll(clk, rst, sum);
 	parameter L = `L; // WANT_TO_CALC_DIGIT(DEC)=100, L -(100/3 +1)+1+1
@@ -26,7 +26,7 @@ module controll(clk, rst, sum);
 
 	reg signed [ 31:0 ] count, endct; // count 0 ~~ L //! 2^bit > L + RAMDELAY
 
-	parameter NTIMES = 72; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
+	parameter NTIMES = 1; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
 
         wire [N-1:0]  sum_dsig,sum_q,div1_dsig,div1_q,div2_dsig,div2_q,sub_dsig,sub_q; // CAUTION!
         wire [5:0]  sum_rdadd,sum_wradd,div1_rdadd,div1_wradd,div2_rdadd,div2_wradd,sub_rdadd,sub_wradd;
@@ -56,9 +56,9 @@ module controll(clk, rst, sum);
         wire [L*N-1:0] divseln;
 	wire [N-1:0] div1Nbitn,div1Nbitd;
 	// divider2(unit) is used at DIV1 and DIV3 ,input differs
-	assign divseln   = (state==DIV1)? div1_q : (state==DIV2 || state==DIV3)? div2_q : sub_q;
+	assign divseln   = (state==DIV1)? div1_q    : (state==DIV2 || state==DIV3)? div2_q : sub_q;
         assign div1Nbitn = divseln;
-	assign div1Nbitd = (state==DIV1)? constdiv1         : (state==DIV2 || state==DIV3)? constdiv2         : param2k;
+	assign div1Nbitd = (state==DIV1)? constdiv1 : (state==DIV2 || state==DIV3)? constdiv2         : param2k;
 
 	divider10a divider1 ( div1remm, div1Nbitn , div1Nbitd, div1quo,div1rem );
 	reg  subcin;
@@ -75,8 +75,8 @@ module controll(clk, rst, sum);
 	add10bitD adder10D( sum_q,sub_q, addq, addcin,addcoutw );
 
 
-        assign sum_dsig = (state==PREINIT)? 10'd0 : (state==MERGEMINUS)? subq: (state==MERGEPLUS)? addq : 10'bz;
-        assign sub_dsig = (state==PREINIT)? 10'd0 : (state==SUB)? subq : (state==DIV4) ? div1quo : 10'bz;
+        assign sum_dsig = (state==PREINIT)? 10'd0 : (state==MERGEMINUS)? subq: (state==MERGEPLUS)? addq : 10'bx;
+        assign sub_dsig = (state==PREINIT)? 10'd0 : (state==SUB)? subq : (state==DIV4) ? div1quo : 10'bx;
 
 	always @(posedge clk or negedge rst) begin
 		if (!rst) begin
@@ -97,9 +97,10 @@ module controll(clk, rst, sum);
 			   // sum <= { (N*L){1'b0} };
 			   count <= count -1;
 			   sum_wren<=1;div1_wren<=1;div2_wren<=1;sub_wren<=1;
-			   if( count == (-`RAMDELAY-1) ) begin
+			   if( count == (32'd0 - `RAMDELAY - 1 ) ) begin
 			      sum_wren<=0;div1_wren<=0;div2_wren<=0;sub_wren<=0;
-			      state <= INIT; count <= 0;
+			      state <= INIT; count <= 0;			      
+
 			   end
 			end
 			  
@@ -109,8 +110,9 @@ module controll(clk, rst, sum);
 			   count <= count -1;
 			   div1_wren <=1;div2_wren<=1;			   
 			   if(count==0-`RAMDELAY) begin
-			      count <= L-1; state <= DIV1; div1remm<=0;//TODO
-			      div1_wren <=0;div2_wren<=0;			   
+			      div1remm<=0;
+			      div1_wren <=0;div2_wren<=0;	
+			      count <= L-1; state <= DIV1; 
 			   end
 			end
 			DIV1: begin // div1 /= divider1, div2 /= divider2, ct:L-1->0
@@ -213,11 +215,13 @@ module controll(clk, rst, sum);
 
 			END: begin
 				if(count != L-1 +`RAMDELAY+1 )begin
-				   if(count-`RAMDELAY >=0 && endct != N*L)begin
+				   if(count  >= `RAMDELAY  && endct != N*L)begin
 				      sum[endct +: N] <= sum_q;
 				      endct <= endct + N;				      
 				   end
 				   count <= count+1;			  				   
+				end else begin
+				   count <= 0; endct <= 0;				   
 				end
 			   
 			end
