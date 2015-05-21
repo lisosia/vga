@@ -1,4 +1,4 @@
-`define L 10
+`define L 47
 `define N 10
 `define RAMDELAY 2
 module controll(clk, rst, sum);
@@ -27,7 +27,7 @@ assign constdiv2 = 10'd 239;
 
 reg signed [ 31:0 ] count, endct; // count 0 ~~ L //! 2^bit > L + RAMDELAY
 
-parameter NTIMES = 1; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
+parameter NTIMES = 109; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
 
 wire [N-1:0]  sum_dsig,sum_q,div1_dsig,div1_q,div2_dsig,div2_q,sub_dsig,sub_q; // CAUTION!
 wire [5:0]  sum_rdadd,sum_wradd,div1_rdadd,div1_wradd,div2_rdadd,div2_wradd,sub_rdadd,sub_wradd;

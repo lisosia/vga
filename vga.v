@@ -9,7 +9,7 @@
 `define VCHARLOG2 5
 `define BITPERCH 4
 
-`define L 10
+`define L 47
 `define N 10
 
 module vga(clk,RSTn, hsync,vsync, r,g,b);
@@ -26,7 +26,8 @@ module vga(clk,RSTn, hsync,vsync, r,g,b);
 	parameter OUTSIZE = `L*12;
 	wire [INSIZE-1 :0] bin;
 	wire [OUTSIZE-1:0] dec;
-	controll controll(clk,RSTn, bin);
+        slowclock slowclock_inst(clk,RSTn,slowclk);   
+	controll controll(slowclk,RSTn, bin);
 	conv #(.L(`L)) conv(clk,RSTn, vsync ,bin, dec );
 
 
