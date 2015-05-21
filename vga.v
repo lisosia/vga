@@ -221,6 +221,7 @@ module conv(clk,RSTn,start,bin,dec);
 	reg [10:0] ct;
 
 	wire[11:0] decoutw;
+        //TODO!!!
 	bcdconv bcdconv( bin[10*ct-1 -:10], decoutw);
 
 

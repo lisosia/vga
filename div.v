@@ -56,4 +56,6 @@ module divider10a( rrpast,n,d,q,rr); //specialize divider10 for multistage divis
 	assign q = (d==10'b0) ? 10'bx: q0;
 	assign r = (d==10'b0) ? 10'bx: r9[9:0];
 	assign rr = r * 10'd1000;
+        // assign rr = 0; //TODO!!!
+   
 endmodule
