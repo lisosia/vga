@@ -16,7 +16,6 @@ tmp/
 vga.cdf
 vga.pin
 vga.pof
-vga.qpf
 vga.qsf
 vga.sdc
 vga.sof

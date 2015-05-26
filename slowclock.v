@@ -2,7 +2,7 @@ module slowclock(inclk,RSTn,outclk);
 	input inclk, RSTn;
 	output outclk;
 	reg outclk;
-	parameter DELAYCONST = 3;
+	parameter DELAYCONST = 1;
 	reg [DELAYCONST-1 :0] counter;
 	always @(posedge inclk or negedge RSTn) begin
 		if (!RSTn) begin

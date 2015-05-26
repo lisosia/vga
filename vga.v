@@ -3,7 +3,7 @@
 `define FONTHLENLOG2 4
 `define FONTVLENLOG2 5
 
-`define HCHAR 50 // 800/FONTHLEN = 50
+`define HCHAR 48 // under 800/FONTHLEN = 50 
 `define VCHAR 18 // 600/ 
 `define HCHARLOG2 6
 `define VCHARLOG2 5
@@ -12,25 +12,30 @@
 `define L 47
 `define N 10
 
-module vga(clk,RSTn, hsync,vsync, r,g,b);
+`define ADR_BITS 6
+
+module vga(clk,RSTn, hsync,vsync, r,g,b,  LEDa,LEDb,LEDc,LEDd,LEDe,LEDf,LEDg,LEDh);
 	parameter N=10; parameter L=`L;
 	input clk, RSTn;
 	output hsync,vsync,  r,g,b;
 	wire out,   hvalid,vvalid;
 	assign r=out;assign g=out;assign b=out;
 	wire [10:0] hcnt,vcnt;	
-
+        output [7:0]     LEDa,LEDb,LEDc,LEDd,LEDe,LEDf,LEDg,LEDh;
+   
    	sync sync(.clk(clk),.RSTn(RSTn),.hsync(hsync),.vsync(vsync),.hvalid(hvalid),.vvalid(vvalid),.hcnt(hcnt),.vcnt(vcnt) );
 
 	parameter INSIZE = `L*N; // L*N
 	parameter OUTSIZE = `L*12;
 	wire [INSIZE-1 :0] bin;
 	wire [OUTSIZE-1:0] dec;
-        slowclock slowclock_inst(clk,RSTn,slowclk);   
-	controll controll(slowclk,RSTn, bin);
-	conv #(.L(`L)) conv(clk,RSTn, vsync ,bin, dec );
-
-
+        wire 		   slowclk;   
+        slowclock slowclock_inst(clk,RSTn,slowclk);  
+        wire [`ADR_BITS-1 :0]   ctrl_rdadd;
+        wire [N-1:0] ctrl_out;   
+	controll controll(slowclk,RSTn, clk,ctrl_rdadd,ctrl_out);
+	//conv #(.L(`L)) conv(clk,RSTn, vsync ,bin, dec );
+   
 	parameter BUFSIZE = `HCHAR*`VCHAR * 4; // =3600
 /*	wire [BUFSIZE-1 :0] display;
 	displaysel #(.L(`L)) displaysel(clk,RSTn, 1'b0, {dec,{(BUFSIZE-OUTSIZE) {1'b1}} }  , display); //displaysel(clk, RSTn,next, in, out);
@@ -38,7 +43,10 @@ module vga(clk,RSTn, hsync,vsync, r,g,b);
 
 	parameter LINEBITS = `BITPERCH*`HCHAR; // BITPERCH*HCHAR = 4*50=200
 	wire [LINEBITS-1 :0] lineout;
-	linesel linesel(clk,RSTn,hcnt,vcnt, {dec,{(BUFSIZE-OUTSIZE) {1'b1}} }, lineout);
+        //linesel linesel(clk,RSTn,hcnt,vcnt, {dec,{(BUFSIZE-OUTSIZE) {1'b1}} }, lineout);
+   charsel_N charsel_inst(slowclk,RSTn, hcnt,vcnt, 0,ctrl_rdadd, ctrl_out, lineout);
+   print_led print_led(clk,0,RSTn, lineout[LINEBITS-1 -:12], lineout[LINEBITS-1-12 -:12], lineout[LINEBITS-1-12-12 -:12],  LEDa,LEDb,LEDc,LEDd,LEDe,LEDf,LEDg,LEDh);
+   
 
 	wire rgboutw;
 	rgbsel rgbsel(clk,RSTn,lineout,   hsync,vsync,hvalid,vvalid,hcnt,vcnt,    rgboutw); //rgbsel(clk,RSTn,lineout, hsync,vsync,hvalid,vvalid,hcnt,vcnt,    out);
@@ -185,6 +193,57 @@ module linesel(clk,RSTn,hcnt,vcnt, display, lineout);
 		end
 	end
 */endmodule
+
+module charsel_N(clk,RSTn,hcnt,vcnt, pagenum, rdadd,sum_q, lineout); //hvalid will assigned to RST
+	parameter BITPERCH = 4;
+        parameter ONE_DEC = BITPERCH * 3; //12   
+	parameter LINEBITS = BITPERCH*`HCHAR; // BITPERCH*HCHAR = 4*48=192
+        output [`ADR_BITS-1:0] rdadd;
+        input [`N-1:0]  sum_q;
+   
+	input clk,RSTn;
+	input [10:0] hcnt,vcnt;
+	output [LINEBITS-1 :0] lineout;
+        reg [LINEBITS-1 :0] lineout;
+
+   input [2:0] 		    pagenum;   
+   wire [4:0] 		    linenum; //TODO change to totalLineNum/`HCHAR
+   reg [4:0] 		    linenum_rem;   
+   reg [`N-1:0] 	    rdadd;
+   
+   assign linenum = vcnt[`FONTVLENLOG2 +: 5]; //long 2 FONTVLEN = 5
+   
+   reg 		   doing;
+     reg [31 :0] h_dx; // < log2 (hchar + ~10 )
+   parameter delay = 1;
+
+   wire [BITPERCH*3 -1 :0] conv_dec;   
+   bcdconv bcdconv1( sum_q , conv_dec);
+   
+			  
+        always @(negedge clk or negedge RSTn) begin
+	   if(!RSTn) begin
+	      linenum_rem <= 4'b1111;
+	   end else
+	   if(linenum_rem != linenum) begin
+	      doing <=1;
+	      //TODO CAUTION!
+	      rdadd <= (`L) -(pagenum+1)*(`VCHAR*`HCHAR/3) + (`HCHAR/3)*(linenum) + (`HCHAR/3 -1);
+	      h_dx <= `HCHAR*BITPERCH  + ONE_DEC*delay;
+	      linenum_rem <= linenum;
+	   end else if (doing == 1'b1) begin 
+	      if (h_dx != 0  ) begin
+		 rdadd <=  rdadd - 1;
+		 h_dx <= h_dx - ONE_DEC; 
+		 lineout[(h_dx -1) -: (ONE_DEC) ] <= conv_dec;		 
+	      end else begin
+		 doing <= 0;		 
+	      end
+	       
+	   end
+	      
+	end
+endmodule
 
 module displaysel(clk, RSTn,next, in, out);
 	input clk, RSTn,next;

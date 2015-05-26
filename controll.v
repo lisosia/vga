@@ -1,12 +1,18 @@
 `define L 47
+`define ADR_BITS 6
 `define N 10
 `define RAMDELAY 2
-module controll(clk, rst, sum);
+module controll(clk, rst, clk_fast,sum_rdadd_ctrl, sum_q);
+
+   input clk_fast;
+   input [`ADR_BITS-1 : 0] sum_rdadd_ctrl;
+   output [`N-1:0] 	  sum_q;   
+   
    parameter L = `L; // WANT_TO_CALC_DIGIT(DEC)=100, L -(100/3 +1)+1+1
    parameter N = 10;
    input clk;
    input rst;
-   output [L*N-1:0] sum;
+   //output [L*N-1:0] sum;
    reg [L*N-1:0]    sum;
    parameter INIT       = 4'h0,
 	       DIV1       = 4'h1,
@@ -24,20 +30,23 @@ assign initdiv1 = 10'd 80; //16*5
 assign initdiv2 = 10'd 956; //4*239
 assign constdiv1 = 10'd 25;
 assign constdiv2 = 10'd 239;
+assign merged_clk = (state!=END)? clk : clk_fast; //INPORTANT
 
 reg signed [ 31:0 ] count, endct; // count 0 ~~ L //! 2^bit > L + RAMDELAY
 
 parameter NTIMES = 109; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
 
-wire [N-1:0]  sum_dsig,sum_q,div1_dsig,div1_q,div2_dsig,div2_q,sub_dsig,sub_q; // CAUTION!
+wire [N-1:0]  sum_dsig,div1_dsig,div1_q,div2_dsig,div2_q,sub_dsig,sub_q; // CAUTION!
+//wire [N-1:0] sum_q;
 wire [5:0]  sum_rdadd,sum_wradd,div1_rdadd,div1_wradd,div2_rdadd,div2_wradd,sub_rdadd,sub_wradd;
 wire [N-1:0] div1dsigtmp,div2dsigtmp;
 reg sum_wren, div1_wren, div2_wren, sub_wren;
-ram2port ram2p_sum (clk,sum_dsig, sum_rdadd, sum_wradd, sum_wren, sum_q); // reg [L*N-1:0] sum;
+ram2port ram2p_sum (merged_clk,sum_dsig, sum_rdadd, sum_wradd, sum_wren, sum_q); // reg [L*N-1:0] sum;
 ram2port ram2p_div1 (clk,div1dsigtmp, div1_rdadd, div1_wradd, div1_wren, div1_q); // reg [L*N-1:0] div1;
 ram2port ram2p_div2 (clk,div2dsigtmp, div2_rdadd, div2_wradd, div2_wren, div2_q); // reg [L*N-1:0] div2;
 ram2port ram2p_sub (clk,sub_dsig, sub_rdadd, sub_wradd, sub_wren, sub_q); // reg [L*N-1:0] sub;
-assign sum_rdadd = count; assign sub_rdadd = count; assign div1_rdadd = count; assign div2_rdadd = count;
+assign sum_rdadd = (state!=END)? count : sum_rdadd_ctrl;
+assign sub_rdadd = count; assign div1_rdadd = count; assign div2_rdadd = count;
 assign sum_wradd = count-`RAMDELAY;        assign sub_wradd = (state==DIV4)? count+`RAMDELAY : count-`RAMDELAY;
 assign div1_wradd = (state==INIT)? (`L-1): (count+`RAMDELAY);
 assign div2_wradd = (state==INIT)? (`L-1): (count+`RAMDELAY);
@@ -81,7 +90,7 @@ assign sub_dsig = (state==PREINIT)? 10'd0 : (state==SUB)? subq_mem : (state==DIV
 
 
 
-always @(negedge clk) begin //remove or megedge rst
+always @(negedge merged_clk) begin //remove or megedge rst
    
    if (!rst) begin
       // reset
@@ -230,7 +239,7 @@ always @(negedge clk) begin //remove or megedge rst
 	   if(count == L-1 +`RAMDELAY+1  ||  (endct == N*L) )begin
 	      count <= 0; endct <= 0;				   
 	   end else begin
-   	      count <= count+1;			  				   	 
+   	      // count <= count+1;  ////ASSERTION, this comment-out wil stop the process in <END>
 	      if(count  >= `RAMDELAY-1)begin
 		 //sum[endct +: N] <= sum_q;
 		 sum[endct +: `N] <= sum_q;
