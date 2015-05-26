@@ -9,7 +9,7 @@
 `define VCHARLOG2 5
 `define BITPERCH 4
 
-`define L 47
+`define L 60
 `define N 10
 
 `define ADR_BITS 6
@@ -215,7 +215,7 @@ module charsel_N(clk,RSTn,hcnt,vcnt, pagenum, rdadd,sum_q, lineout); //hvalid wi
    
    reg 		   doing;
      reg [31 :0] h_dx; // < log2 (hchar + ~10 )
-   parameter delay = 1;
+   parameter delay = 0;
 
    wire [BITPERCH*3 -1 :0] conv_dec;   
    bcdconv bcdconv1( sum_q , conv_dec);

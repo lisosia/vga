@@ -1,4 +1,4 @@
-`define L 47
+`define L 60
 `define ADR_BITS 6
 `define N 10
 `define RAMDELAY 2
