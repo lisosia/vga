@@ -1,4 +1,4 @@
-`define L 47
+`define L 230//230
 `define N 10
 module print_led(clk,keys,RSTn, dec0,dec1,dec2, LEDa,LEDb,LEDc,LEDd,LEDe,LEDf,LEDg,LEDh);
    input clk,RSTn;

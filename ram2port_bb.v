@@ -41,8 +41,8 @@ module ram2port (
 
 	input	  clock;
 	input	[15:0]  data;
-	input	[5:0]  rdaddress;
-	input	[5:0]  wraddress;
+	input	[9:0]  rdaddress;
+	input	[9:0]  wraddress;
 	input	  wren;
 	output	[15:0]  q;
 `ifndef ALTERA_RESERVED_QIS
@@ -91,7 +91,7 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ENABLED NUMERIC "0"
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
-// Retrieval info: PRIVATE: MEMSIZE NUMERIC "1024"
+// Retrieval info: PRIVATE: MEMSIZE NUMERIC "16384"
 // Retrieval info: PRIVATE: MEM_IN_BITS NUMERIC "0"
 // Retrieval info: PRIVATE: MIFfilename STRING "./initzero.mif"
 // Retrieval info: PRIVATE: OPERATION_MODE NUMERIC "2"
@@ -128,15 +128,15 @@ endmodule
 // Retrieval info: CONSTANT: INIT_FILE STRING "./initzero.mif"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
-// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "64"
-// Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "64"
+// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "1024"
+// Retrieval info: CONSTANT: NUMWORDS_B NUMERIC "1024"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "DUAL_PORT"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_B STRING "NONE"
 // Retrieval info: CONSTANT: OUTDATA_REG_B STRING "CLOCK0"
 // Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "FALSE"
 // Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_MIXED_PORTS STRING "OLD_DATA"
-// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "6"
-// Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "6"
+// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "10"
+// Retrieval info: CONSTANT: WIDTHAD_B NUMERIC "10"
 // Retrieval info: CONSTANT: WIDTH_A NUMERIC "16"
 // Retrieval info: CONSTANT: WIDTH_B NUMERIC "16"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
@@ -144,11 +144,11 @@ endmodule
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
 // Retrieval info: USED_PORT: data 0 0 16 0 INPUT NODEFVAL "data[15..0]"
 // Retrieval info: USED_PORT: q 0 0 16 0 OUTPUT NODEFVAL "q[15..0]"
-// Retrieval info: USED_PORT: rdaddress 0 0 6 0 INPUT NODEFVAL "rdaddress[5..0]"
-// Retrieval info: USED_PORT: wraddress 0 0 6 0 INPUT NODEFVAL "wraddress[5..0]"
+// Retrieval info: USED_PORT: rdaddress 0 0 10 0 INPUT NODEFVAL "rdaddress[9..0]"
+// Retrieval info: USED_PORT: wraddress 0 0 10 0 INPUT NODEFVAL "wraddress[9..0]"
 // Retrieval info: USED_PORT: wren 0 0 0 0 INPUT GND "wren"
-// Retrieval info: CONNECT: @address_a 0 0 6 0 wraddress 0 0 6 0
-// Retrieval info: CONNECT: @address_b 0 0 6 0 rdaddress 0 0 6 0
+// Retrieval info: CONNECT: @address_a 0 0 10 0 wraddress 0 0 10 0
+// Retrieval info: CONNECT: @address_b 0 0 10 0 rdaddress 0 0 10 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
 // Retrieval info: CONNECT: @data_a 0 0 16 0 data 0 0 16 0
 // Retrieval info: CONNECT: @wren_a 0 0 0 0 wren 0 0 0 0

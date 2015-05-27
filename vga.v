@@ -9,10 +9,10 @@
 `define VCHARLOG2 5
 `define BITPERCH 4
 
-`define L 60
+`define L 230//230
 `define N 10
 
-`define ADR_BITS 6
+`define ADR_BITS 10
 
 module vga(clk,RSTn, hsync,vsync, r,g,b,  LEDa,LEDb,LEDc,LEDd,LEDe,LEDf,LEDg,LEDh);
 	parameter N=10; parameter L=`L;

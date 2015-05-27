@@ -12,7 +12,7 @@ module vgasim1;
       #15 RSTn<=0;
       #25 RSTn<=1;
 
-      #(20*6*L*72 * 100) $finish;
+      #(20*6*L*72 * 100   *4) $finish;
    end
 
    always #10 begin

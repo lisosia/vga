@@ -1,8 +1,9 @@
-`define L 60
-`define ADR_BITS 6
+`define L 230//10
+`define ADR_BITS 10
 `define N 10
 `define RAMDELAY 2
 module controll(clk, rst, clk_fast,sum_rdadd_ctrl, sum_q);
+   parameter NTIMES = 500;//1 // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
 
    input clk_fast;
    input [`ADR_BITS-1 : 0] sum_rdadd_ctrl;
@@ -34,11 +35,10 @@ assign merged_clk = (state!=END)? clk : clk_fast; //INPORTANT
 
 reg signed [ 31:0 ] count, endct; // count 0 ~~ L //! 2^bit > L + RAMDELAY
 
-parameter NTIMES = 109; // 3*L/1.4+1 ~= 100/1.4 +1 ???   OVERFLOOOOOOOOOOOOOOOOOOOOOO!!!
 
 wire [N-1:0]  sum_dsig,div1_dsig,div1_q,div2_dsig,div2_q,sub_dsig,sub_q; // CAUTION!
 //wire [N-1:0] sum_q;
-wire [5:0]  sum_rdadd,sum_wradd,div1_rdadd,div1_wradd,div2_rdadd,div2_wradd,sub_rdadd,sub_wradd;
+wire [`ADR_BITS-1:0]  sum_rdadd,sum_wradd,div1_rdadd,div1_wradd,div2_rdadd,div2_wradd,sub_rdadd,sub_wradd;
 wire [N-1:0] div1dsigtmp,div2dsigtmp;
 reg sum_wren, div1_wren, div2_wren, sub_wren;
 ram2port ram2p_sum (merged_clk,sum_dsig, sum_rdadd, sum_wradd, sum_wren, sum_q); // reg [L*N-1:0] sum;
