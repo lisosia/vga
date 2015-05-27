@@ -79,7 +79,7 @@ module rgbsel(clk,RSTn,lineout, hsync,vsync,hvalid,vvalid,hcnt,vcnt,    out);
 	assign linenumlowbits = vcnt[0 +: `FONTVLENLOG2]; //long 2 FONTVLEN = 5
 	assign findexv = linenumlowbits; //decr
 	////////////////////////////!!!!!!!!!??????????????????????///////////////////
-
+   
 
    	wire [`FONTHLENLOG2-1 : 0] findexh; //log2 FONTHLEN, incre
    	assign findexh = hcnt; //decr
@@ -97,7 +97,7 @@ module rgbsel(clk,RSTn,lineout, hsync,vsync,hvalid,vvalid,hcnt,vcnt,    out);
 			//// findexh <= 0;
 			//chrdxh <= `HCHAR;
 		end else begin
-			if(hvalid==1)begin
+			if(hvalid==1 && chrdxh < `HCHAR)begin
 				out <= outw;				
 				if(findexh == `FONTHLEN - 1)begin
 					//chrdxh <= chrdxh - 1;
